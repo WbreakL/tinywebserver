@@ -30,7 +30,7 @@ struct client_data
 {
     sockaddr_in address;
     int sockfd;
-    util_timer *timer;
+    util_timer* timer;
 };
 
 class util_timer
@@ -40,11 +40,11 @@ public:
 
 public:
     time_t expire;
-    
-    void (* cb_func)(client_data *);
-    client_data *user_data;
-    util_timer *prev;
-    util_timer *next;
+
+    void (*cb_func)(client_data*);
+    client_data* user_data;
+    util_timer* prev;
+    util_timer* next;
 };
 
 class sort_timer_lst
@@ -53,16 +53,16 @@ public:
     sort_timer_lst();
     ~sort_timer_lst();
 
-    void add_timer(util_timer *timer);
-    void adjust_timer(util_timer *timer);
-    void del_timer(util_timer *timer);
+    void add_timer(util_timer* timer);
+    void adjust_timer(util_timer* timer);
+    void del_timer(util_timer* timer);
     void tick();
 
 private:
-    void add_timer(util_timer *timer, util_timer *lst_head);
+    void add_timer(util_timer* timer, util_timer* lst_head);
 
-    util_timer *head;
-    util_timer *tail;
+    util_timer* head;
+    util_timer* tail;
 };
 
 class Utils
@@ -88,15 +88,15 @@ public:
     //定时处理任务，重新定时以不断触发SIGALRM信号
     void timer_handler();
 
-    void show_error(int connfd, const char *info);
+    void show_error(int connfd, const char* info);
 
 public:
-    static int *u_pipefd;
+    static int* u_pipefd;
     sort_timer_lst m_timer_lst;
     static int u_epollfd;
     int m_TIMESLOT;
 };
 
-void cb_func(client_data *user_data);
+void cb_func(client_data* user_data);
 
 #endif

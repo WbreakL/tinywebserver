@@ -4,23 +4,23 @@
 #include <fstream>
 
 //定义http响应的一些状态信息
-const char *ok_200_title = "OK";
-const char *error_400_title = "Bad Request";
-const char *error_400_form = "Your request has bad syntax or is inherently impossible to staisfy.\n";
-const char *error_403_title = "Forbidden";
-const char *error_403_form = "You do not have permission to get file form this server.\n";
-const char *error_404_title = "Not Found";
-const char *error_404_form = "The requested file was not found on this server.\n";
-const char *error_500_title = "Internal Error";
-const char *error_500_form = "There was an unusual problem serving the request file.\n";
+const char* ok_200_title = "OK";
+const char* error_400_title = "Bad Request";
+const char* error_400_form = "Your request has bad syntax or is inherently impossible to staisfy.\n";
+const char* error_403_title = "Forbidden";
+const char* error_403_form = "You do not have permission to get file form this server.\n";
+const char* error_404_title = "Not Found";
+const char* error_404_form = "The requested file was not found on this server.\n";
+const char* error_500_title = "Internal Error";
+const char* error_500_form = "There was an unusual problem serving the request file.\n";
 
 locker m_lock;
 map<string, string> users;
 
-void http_conn::initmysql_result(connection_pool *connPool)
+void http_conn::initmysql_result(connection_pool* connPool)
 {
     //先从连接池中取一个连接
-    MYSQL *mysql = NULL;
+    MYSQL* mysql = NULL;
     connectionRAII mysqlcon(&mysql, connPool);
 
     //在user表中检索username，passwd数据，浏览器端输入
@@ -30,13 +30,13 @@ void http_conn::initmysql_result(connection_pool *connPool)
     }
 
     //从表中检索完整的结果集
-    MYSQL_RES *result = mysql_store_result(mysql);
+    MYSQL_RES* result = mysql_store_result(mysql);
 
     //返回结果集中的列数
     int num_fields = mysql_num_fields(result);
 
     //返回所有字段结构的数组
-    MYSQL_FIELD *fields = mysql_fetch_fields(result);
+    MYSQL_FIELD* fields = mysql_fetch_fields(result);
 
     //从结果集中获取下一行，将对应的用户名和密码，存入map中
     while (MYSQL_ROW row = mysql_fetch_row(result))
@@ -110,8 +110,8 @@ void http_conn::close_conn(bool real_close)
 }
 
 //初始化连接,外部调用初始化套接字地址
-void http_conn::init(int sockfd, const sockaddr_in &addr, char *root, int TRIGMode,
-                     int close_log, string user, string passwd, string sqlname)
+void http_conn::init(int sockfd, const sockaddr_in& addr, char* root, int TRIGMode,
+    int close_log, string user, string passwd, string sqlname)
 {
     m_sockfd = sockfd;
     m_address = addr;
@@ -239,7 +239,7 @@ bool http_conn::read_once()
 }
 
 //解析http请求行，获得请求方法，目标url及http版本号
-http_conn::HTTP_CODE http_conn::parse_request_line(char *text)
+http_conn::HTTP_CODE http_conn::parse_request_line(char* text)
 {
     m_url = strpbrk(text, " \t");
     if (!m_url)
@@ -247,7 +247,7 @@ http_conn::HTTP_CODE http_conn::parse_request_line(char *text)
         return BAD_REQUEST;
     }
     *m_url++ = '\0';
-    char *method = text;
+    char* method = text;
     if (strcasecmp(method, "GET") == 0)
         m_method = GET;
     else if (strcasecmp(method, "POST") == 0)
@@ -287,7 +287,7 @@ http_conn::HTTP_CODE http_conn::parse_request_line(char *text)
 }
 
 //解析http请求的一个头部信息
-http_conn::HTTP_CODE http_conn::parse_headers(char *text)
+http_conn::HTTP_CODE http_conn::parse_headers(char* text)
 {
     if (text[0] == '\0')
     {
@@ -327,7 +327,7 @@ http_conn::HTTP_CODE http_conn::parse_headers(char *text)
 }
 
 //判断http请求是否被完整读入
-http_conn::HTTP_CODE http_conn::parse_content(char *text)
+http_conn::HTTP_CODE http_conn::parse_content(char* text)
 {
     if (m_read_idx >= (m_content_length + m_checked_idx))
     {
@@ -343,7 +343,7 @@ http_conn::HTTP_CODE http_conn::process_read()
 {
     LINE_STATUS line_status = LINE_OK;
     HTTP_CODE ret = NO_REQUEST;
-    char *text = 0;
+    char* text = 0;
 
     while ((m_check_state == CHECK_STATE_CONTENT && line_status == LINE_OK) || ((line_status = parse_line()) == LINE_OK))
     {
@@ -390,7 +390,7 @@ http_conn::HTTP_CODE http_conn::do_request()
     strcpy(m_real_file, doc_root);
     int len = strlen(doc_root);
     //printf("m_url:%s\n", m_url);
-    const char *p = strrchr(m_url, '/');
+    const char* p = strrchr(m_url, '/');
 
     //处理cgi
     if (cgi == 1 && (*(p + 1) == '2' || *(p + 1) == '3'))
@@ -399,7 +399,7 @@ http_conn::HTTP_CODE http_conn::do_request()
         //根据标志判断是登录检测还是注册检测
         char flag = m_url[1];
 
-        char *m_url_real = (char *)malloc(sizeof(char) * 200);
+        char* m_url_real = (char*)malloc(sizeof(char) * 200);
         strcpy(m_url_real, "/");
         strcat(m_url_real, m_url + 2);
         strncpy(m_real_file + len, m_url_real, FILENAME_LEN - len - 1);
@@ -422,7 +422,7 @@ http_conn::HTTP_CODE http_conn::do_request()
         {
             //如果是注册，先检测数据库中是否有重名的
             //没有重名的，进行增加数据
-            char *sql_insert = (char *)malloc(sizeof(char) * 200);
+            char* sql_insert = (char*)malloc(sizeof(char) * 200);
             strcpy(sql_insert, "INSERT INTO user(username, passwd) VALUES(");
             strcat(sql_insert, "'");
             strcat(sql_insert, name);
@@ -458,7 +458,7 @@ http_conn::HTTP_CODE http_conn::do_request()
 
     if (*(p + 1) == '0')
     {
-        char *m_url_real = (char *)malloc(sizeof(char) * 200);
+        char* m_url_real = (char*)malloc(sizeof(char) * 200);
         strcpy(m_url_real, "/register.html");
         strncpy(m_real_file + len, m_url_real, strlen(m_url_real));
 
@@ -466,7 +466,7 @@ http_conn::HTTP_CODE http_conn::do_request()
     }
     else if (*(p + 1) == '1')
     {
-        char *m_url_real = (char *)malloc(sizeof(char) * 200);
+        char* m_url_real = (char*)malloc(sizeof(char) * 200);
         strcpy(m_url_real, "/log.html");
         strncpy(m_real_file + len, m_url_real, strlen(m_url_real));
 
@@ -474,7 +474,7 @@ http_conn::HTTP_CODE http_conn::do_request()
     }
     else if (*(p + 1) == '5')
     {
-        char *m_url_real = (char *)malloc(sizeof(char) * 200);
+        char* m_url_real = (char*)malloc(sizeof(char) * 200);
         strcpy(m_url_real, "/picture.html");
         strncpy(m_real_file + len, m_url_real, strlen(m_url_real));
 
@@ -482,7 +482,7 @@ http_conn::HTTP_CODE http_conn::do_request()
     }
     else if (*(p + 1) == '6')
     {
-        char *m_url_real = (char *)malloc(sizeof(char) * 200);
+        char* m_url_real = (char*)malloc(sizeof(char) * 200);
         strcpy(m_url_real, "/video.html");
         strncpy(m_real_file + len, m_url_real, strlen(m_url_real));
 
@@ -490,7 +490,7 @@ http_conn::HTTP_CODE http_conn::do_request()
     }
     else if (*(p + 1) == '7')
     {
-        char *m_url_real = (char *)malloc(sizeof(char) * 200);
+        char* m_url_real = (char*)malloc(sizeof(char) * 200);
         strcpy(m_url_real, "/fans.html");
         strncpy(m_real_file + len, m_url_real, strlen(m_url_real));
 
@@ -509,7 +509,7 @@ http_conn::HTTP_CODE http_conn::do_request()
         return BAD_REQUEST;
 
     int fd = open(m_real_file, O_RDONLY);
-    m_file_address = (char *)mmap(0, m_file_stat.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+    m_file_address = (char*)mmap(0, m_file_stat.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
     close(fd);
     return FILE_REQUEST;
 }
@@ -578,7 +578,7 @@ bool http_conn::write()
         }
     }
 }
-bool http_conn::add_response(const char *format, ...)
+bool http_conn::add_response(const char* format, ...)
 {
     if (m_write_idx >= WRITE_BUFFER_SIZE)
         return false;
@@ -597,14 +597,14 @@ bool http_conn::add_response(const char *format, ...)
 
     return true;
 }
-bool http_conn::add_status_line(int status, const char *title)
+bool http_conn::add_status_line(int status, const char* title)
 {
     return add_response("%s %d %s\r\n", "HTTP/1.1", status, title);
 }
 bool http_conn::add_headers(int content_len)
 {
     return add_content_length(content_len) && add_linger() &&
-           add_blank_line();
+        add_blank_line();
 }
 bool http_conn::add_content_length(int content_len)
 {
@@ -622,7 +622,7 @@ bool http_conn::add_blank_line()
 {
     return add_response("%s", "\r\n");
 }
-bool http_conn::add_content(const char *content)
+bool http_conn::add_content(const char* content)
 {
     return add_response("%s", content);
 }
@@ -670,7 +670,7 @@ bool http_conn::process_write(HTTP_CODE ret)
         }
         else
         {
-            const char *ok_string = "<html><body></body></html>";
+            const char* ok_string = "<html><body></body></html>";
             add_headers(strlen(ok_string));
             if (!add_content(ok_string))
                 return false;

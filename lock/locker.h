@@ -60,7 +60,7 @@ public:
     {
         return pthread_mutex_unlock(&m_mutex) == 0;
     }
-    pthread_mutex_t *get()
+    pthread_mutex_t* get()
     {
         return &m_mutex;
     }
@@ -83,7 +83,7 @@ public:
     {
         pthread_cond_destroy(&m_cond);
     }
-    bool wait(pthread_mutex_t *m_mutex)
+    bool wait(pthread_mutex_t* m_mutex)
     {
         int ret = 0;
         //pthread_mutex_lock(&m_mutex);
@@ -91,7 +91,7 @@ public:
         //pthread_mutex_unlock(&m_mutex);
         return ret == 0;
     }
-    bool timewait(pthread_mutex_t *m_mutex, struct timespec t)
+    bool timewait(pthread_mutex_t* m_mutex, struct timespec t)
     {
         int ret = 0;
         //pthread_mutex_lock(&m_mutex);
